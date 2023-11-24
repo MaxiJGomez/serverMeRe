@@ -6,12 +6,23 @@ const io = require("socket.io")(server, {
   cors: { origin: "*" },
 });
 
-const listaAlertas = []; // ===> Lista de todas las salas privadas de cada alerta
+var listaAlertas = []; // ===> Lista de todas las salas privadas de cada alerta
 
 io.on("connection", (socket) => {
   socket.on("ubicacion_privada", (data) => {
-    socket.join(data.idSala); // ===> Para crear / unirse a una sala
-    agregarAlertas(data); // ===> Agrega las salas creadas a la listas de Salas
+    if (data.tipoApp === "victima") {
+      socket.join(data.idSala); // ===> Crea una sala APP victima
+      agregarAlertas(data); // ===> Agrega las salas creadas a la listas de Salas
+    } else {
+      const existeSala = listaAlertas.some((el) => el.idSala === data.idSala); // ===> Comprueba que exista una sala ya creada
+      if (existeSala) {
+        socket.join(data.idSala); // ===> Se une a una sala existente APP policia
+      } else {
+        socket.join(data.idSala); // ===> Al no coincidir con el código de la sala de la vícitima, crea una sala  nueva para emitir un mensaje de error y después eliminar la misma sala
+        io.to(data.idSala).emit("ubicacionPrivada", "Código inexistente"); // ===> envía mensaje de error
+        eliminarAlertas(data.idSala);
+      }
+    }
   });
   socket.on("ubicacion_actual", (data) => {
     console.log(data);
@@ -24,14 +35,12 @@ io.on("connection", (socket) => {
 
   socket.on("eliminar_sala", (data) => {
     // ===> Filtrar el array para mantener solo las alertas que no tienen el idSala que deseas eliminar
-    listaAlertas = listaAlertas.filter(
-      (alerta) => alerta.idSala !== data.idSala
-    );
     eliminarAlertas(data);
   });
 
-  const eliminarAlertas = (nombreAlerta) => {
-    console.log(`Elimino sala: ${nombreAlerta}`);
+  const eliminarAlertas = (idSala) => {
+    listarAlertas = listaAlertas.filter((alerta) => alerta.idSala !== idSala); // ===> Funcion para eliminar una Sala
+    console.log(listaAlertas);
   };
   const agregarAlertas = (nombreAlerta) => {
     const existe = listaAlertas.some((el) => el.idSala === nombreAlerta.idSala); // ===>controla que el idSala del objeto nuevo no se repita en algún elemento del array listaAlertas
