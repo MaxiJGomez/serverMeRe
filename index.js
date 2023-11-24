@@ -39,7 +39,7 @@ io.on("connection", (socket) => {
   });
 
   const eliminarAlertas = (idSala) => {
-    listaAlertas.filter((alerta) => alerta.idSala !== idSala); // ===> Funcion para eliminar una Sala
+    listarAlertas = listaAlertas.filter((alerta) => alerta.idSala !== idSala); // ===> Funcion para eliminar una Sala
     console.log(listaAlertas);
   };
   const agregarAlertas = (nombreAlerta) => {
