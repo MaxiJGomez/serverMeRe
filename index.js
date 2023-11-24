@@ -6,7 +6,7 @@ const io = require("socket.io")(server, {
   cors: { origin: "*" },
 });
 
-const listaAlertas = []; // ===> Lista de todas las salas privadas de cada alerta
+var listaAlertas = []; // ===> Lista de todas las salas privadas de cada alerta
 
 io.on("connection", (socket) => {
   socket.on("ubicacion_privada", (data) => {
