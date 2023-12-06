@@ -12,7 +12,6 @@ io.on("connection", (socket) => {
   socket.on("creacion_sala", (data) => {
     if (data.tipoApp === "victima") {
       const codigoSala =generarCodigoUnico(listaAlertas)
-      console.log(codigoSala)
       socket.join(data.idUsu); // ===> Crea sala privada de la victima
       socket.join(codigoSala)
       agregarAlertas({...data, codigoSala}); // ===> Agrega las salas creadas a la listas de Salas
@@ -20,7 +19,8 @@ io.on("connection", (socket) => {
     } else {
       const existeSala = listaAlertas.some((el) => el.codigoSala === data.codigoSala); // ===> Comprueba que exista una sala ya creada
       if (existeSala) {
-        socket.join(obtenerIdUsu(data.codigoSala)); // ===> Se une a una sala existente APP policia
+        socket.join(data.codigoSala); // ===> Se une a sala de victima APP policia
+        socket.join(`${data.codigoSala}policia`); // ===> Se une o crea sala paralela a una existente APP policia
       } else {
         socket.join(data.idUsu); // ===> Al no coincidir con el código de la sala de la vícitima, crea una sala  nueva para emitir un mensaje de error y después eliminar la misma sala
         io.to(data.idUsu).emit("ubicacionPrivada", "Código inexistente"); // ===> envía mensaje de error
@@ -28,10 +28,15 @@ io.on("connection", (socket) => {
       }
     }
   });
+
   socket.on("ubicacion_actual", (data) => {
-   // console.log(data);
-   
-    io.to(data.idUsu).emit("ubicacionPrivada", data); // ===> envía los datos (lat, long, etc.) del usu a una sala de alerta
+    console.log(data)
+    if(data.tipoApp === "victima"){
+      io.to(data.codigoSala).emit("ubicacionPrivada", data); // ===> envía los datos (lat, long, etc.) del usu a una sala de alerta
+    }else if(data.tipoApp === "policia"){
+
+      io.to(data.codigoSala).emit("ubicacionPrivadaPolicias", data); // ===> envía los datos (lat, long, etc.) del policia a una sala de alerta
+    }
   });
 
   socket.on("get_room_list", () => {
@@ -43,8 +48,8 @@ io.on("connection", (socket) => {
     eliminarAlertas(data);
   });
 
-  const eliminarAlertas = (idUsu) => {
-    listarAlertas = listaAlertas.filter((alerta) => alerta.idUsu !== idUsu); // ===> Funcion para eliminar una Sala
+  const eliminarAlertas = (codigoSala) => {
+    listarAlertas = listaAlertas.filter((alerta) => alerta.codigoSala !== codigoSala); // ===> Funcion para eliminar una Sala
     console.log(listaAlertas);
   };
   const agregarAlertas = (nombreAlerta) => {
@@ -55,7 +60,9 @@ io.on("connection", (socket) => {
         idUsu: nombreAlerta.idUsu,
         nombre: nombreAlerta.nombre,
         apellido: nombreAlerta.apellido,
-        codigoSala: generarCodigoUnico(listaAlertas)
+        codigoSala: nombreAlerta.codigoSala,
+        latitudInicial: nombreAlerta.latitudInicial,
+        longitudInicial: nombreAlerta.longitudInicial
       }); // ===> agrega el objeto nuevo al array listaAlertas en caso de que no exista uno con el mismo idSala
       console.log(listaAlertas);
     }
