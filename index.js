@@ -8,6 +8,7 @@ const io = require("socket.io")(server, {
 
 var listaAlertas = []; // ===> Lista de todas las salas privadas de cada alerta
 
+
 io.on("connection", (socket) => {
   socket.on("creacion_sala", (data) => {
     if (data.tipoApp === "victima") {
@@ -21,6 +22,7 @@ io.on("connection", (socket) => {
       if (existeSala) {
         socket.join(data.codigoSala); // ===> Se une a sala de victima APP policia
         socket.join(`${data.codigoSala}policia`); // ===> Se une o crea sala paralela a una existente APP policia
+        io.to(data.codigoSala).emit("ubicacionPrivada", obtenerUbiInicial(data.codigoSala))
       } else {
         socket.join(data.idUsu); // ===> Al no coincidir con el código de la sala de la vícitima, crea una sala  nueva para emitir un mensaje de error y después eliminar la misma sala
         io.to(data.idUsu).emit("ubicacionPrivada", "Código inexistente"); // ===> envía mensaje de error
@@ -61,8 +63,8 @@ io.on("connection", (socket) => {
         nombre: nombreAlerta.nombre,
         apellido: nombreAlerta.apellido,
         codigoSala: nombreAlerta.codigoSala,
-        latitudInicial: nombreAlerta.latitudInicial,
-        longitudInicial: nombreAlerta.longitudInicial
+        latitud: nombreAlerta.latitudInicial,
+        longitud: nombreAlerta.longitudInicial
       }); // ===> agrega el objeto nuevo al array listaAlertas en caso de que no exista uno con el mismo idSala
       console.log(listaAlertas);
     }
@@ -94,12 +96,12 @@ const generarCodigoUnico=(array)=>{
   return nuevoCodigo;
 }
 
-const obtenerIdUsu =(codigoSala)=>{
+const obtenerUbiInicial =(codigoSala)=>{
   // Buscar el objeto con el código de sala dado
   const objetoEncontrado = listaAlertas.find(item => item.codigoSala === codigoSala);
 
   // Devolver el idUsu si se encontró el objeto, o null si no se encontró
-  return objetoEncontrado.idUsu;
+  return objetoEncontrado;
 }
 
 
