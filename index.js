@@ -23,7 +23,7 @@ io.on("connection", (socket) => {
       if (existeSala) {
         socket.join(data.codigoSala); // ===> Se une a sala de victima APP policia
         socket.join(`${data.codigoSala}policia`); // ===> Se une o crea sala paralela a una existente APP policia
-        data.Dispo !== "" ? listaPolicias[obtenerIdUsu(data.codigoSala)].policias[data.idDispo] = {ubicacion: []} : ()=>{}
+        data.tipoApp === "policia" ? listaPolicias[obtenerIdUsu(data.codigoSala)].policias[data.idDispo] = {ubicacion: []} : ()=>{}
         
         io.to(data.codigoSala).emit("ubicacionPrivada", obtenerUbiInicial(data.codigoSala))
       } else {
@@ -38,8 +38,13 @@ io.on("connection", (socket) => {
     if(data.tipoApp === "victima"){
       io.to(data.codigoSala).emit("ubicacionPrivada", data); // ===> envía los datos (lat, long, etc.) del usu a una sala de alerta
     }else if(data.tipoApp === "policia"){
-        listaPolicias[obtenerIdUsu(data.codigoSala)].policias[data.idDispo].ubicacion.push({latitud: data.latitud, longitud: data.longitud})
-      io.to(`${data.codigoSala}policia`).emit("ubicacionPrivadaPolicias", listaPolicias[obtenerIdUsu(data.codigoSala)].policias); // ===> envía los datos (lat, long, etc.) del policia a una sala de alerta
+
+
+      listaPolicias[obtenerIdUsu(data.codigoSala)].policias[data.idDispo].ubicacion.push({latitud: data.latitud, longitud: data.longitud})
+
+      const ultimasUbis = ultimaUbiPolicia(data.codigoSala)
+
+      io.to(`${data.codigoSala}policia`).emit("ubicacionPrivadaPolicias", ultimasUbis); // ===> envía los datos (lat, long, etc.) del policia a una sala de alerta
     }
   });
 
@@ -118,6 +123,46 @@ const obtenerIdUsu =(codigoSala)=>{
  // Devolver el idUsu si se encontró el objeto, o null si no se encontró
   return objetoEncontrado.idUsu;
 }
+
+const ultimaUbiPolicia = (codigoSala)=>{
+  let resultado = [];
+  const objeto = listaPolicias[obtenerIdUsu(codigoSala)]
+
+  // Verificar si el objeto tiene las propiedades esperadas
+  if (objeto && objeto.policias) {
+    // Iterar sobre las propiedades del objeto "policias"
+    for (const idDispo in objeto.policias) {
+        if (objeto.policias.hasOwnProperty(idDispo)) {
+            const ubicaciones = objeto.policias[idDispo];
+            console.log("Primer console")
+            console.log(`${idDispo} : ${ubicaciones}`)
+            console.log(Array.isArray(ubicaciones))
+            // Verificar si el valor asociado a la propiedad "idDispo" es un array
+            if (Array.isArray(ubicaciones)) {
+              // Obtener el último elemento del array
+              const ultimoElemento = ubicaciones.length > 0 ? ubicaciones[ubicaciones.length - 1] : null;
+
+              if (ultimoElemento && typeof ultimoElemento === 'object' && Object.keys(ultimoElemento).length > 0) {
+                // Extraer las propiedades deseadas y agregar un nuevo objeto con "idDispo" al resultado
+                const latitud = ultimoElemento.latitud !== undefined ? ultimoElemento.latitud : null;
+                const longitud = ultimoElemento.longitud !== undefined ? ultimoElemento.longitud : null;
+                resultado.push({ idDispo, latitud, longitud });
+              }
+
+            } else if (ubicaciones && typeof ubicaciones === 'object') {
+                const latitud = ubicaciones.latitud !== undefined ? ubicaciones.latitud : null;
+                const longitud = ubicaciones.longitud !== undefined ? ubicaciones.longitud : null;
+                  resultado.push({ idDispo, latitud, longitud });
+                  }            
+        }
+    }
+} else {
+    console.error('El objeto proporcionado no tiene la estructura esperada.');
+}
+console.log(resultado)
+return resultado;
+}
+
 
 
 server.listen(5050, () => console.log(server.address()));

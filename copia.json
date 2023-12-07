@@ -1,0 +1,4 @@
+{"codigoSala": "2621", "policias": {"486c9d6ad71d2082": [{latitud: 23, longitud: 44},{latitud: 25, longitud: 45}], "9bce84af03c3d2f3": [{latitud: 1, longitud: 2},{latitud: 3, longitud: 4},{latitud: 5, longitud: 6}]}}
+
+
+[{idDispo: "486c9d6ad71d2082", latitud: 25, longitud: 45},{idDispo:"9bce84af03c3d2f3", latitud: 5, longitud: 6}]
