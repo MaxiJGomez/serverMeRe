@@ -38,12 +38,8 @@ io.on("connection", (socket) => {
     if(data.tipoApp === "victima"){
       io.to(data.codigoSala).emit("ubicacionPrivada", data); // ===> envía los datos (lat, long, etc.) del usu a una sala de alerta
     }else if(data.tipoApp === "policia"){
-
-
       listaPolicias[obtenerIdUsu(data.codigoSala)].policias[data.idDispo].ubicacion.push({latitud: data.latitud, longitud: data.longitud})
-
       const ultimasUbis = ultimaUbiPolicia(data.codigoSala)
-
       io.to(`${data.codigoSala}policia`).emit("ubicacionPrivadaPolicias", ultimasUbis); // ===> envía los datos (lat, long, etc.) del policia a una sala de alerta
     }
   });
@@ -76,13 +72,9 @@ io.on("connection", (socket) => {
       const id = nombreAlerta.idUsu
 
       listaPolicias[id] = {codigoSala: nombreAlerta.codigoSala, policias: {}}
-
     }
-
-
   };
 });
-
 
 const generarCodigoSala =() => {
   // Generar un número de 4 dígitos al azar
@@ -115,6 +107,7 @@ const obtenerUbiInicial =(codigoSala)=>{
   // Devolver el idUsu si se encontró el objeto, o null si no se encontró
   return objetoEncontrado;
 }
+
 const obtenerIdUsu =(codigoSala)=>{
 
  // Buscar el objeto con el código de sala dado
@@ -128,39 +121,31 @@ const ultimaUbiPolicia = (codigoSala)=>{
   let resultado = [];
   const objeto = listaPolicias[obtenerIdUsu(codigoSala)]
 
-  // Verificar si el objeto tiene las propiedades esperadas
-  if (objeto && objeto.policias) {
-    // Iterar sobre las propiedades del objeto "policias"
-    for (const idDispo in objeto.policias) {
-        if (objeto.policias.hasOwnProperty(idDispo)) {
-            const ubicaciones = objeto.policias[idDispo];
-            console.log("Primer console")
-            console.log(`${idDispo} : ${ubicaciones}`)
-            console.log(Array.isArray(ubicaciones))
-            // Verificar si el valor asociado a la propiedad "idDispo" es un array
-            if (Array.isArray(ubicaciones)) {
-              // Obtener el último elemento del array
-              const ultimoElemento = ubicaciones.length > 0 ? ubicaciones[ubicaciones.length - 1] : null;
+    // Verificar si el objeto tiene las propiedades esperadas
+    if (objeto && objeto.policias) {
+      // Iterar sobre las propiedades del objeto "policias"
+      for (const idDispo in objeto.policias) {
+          if (objeto.policias.hasOwnProperty(idDispo)) {
+              const policia = objeto.policias[idDispo];
 
-              if (ultimoElemento && typeof ultimoElemento === 'object' && Object.keys(ultimoElemento).length > 0) {
-                // Extraer las propiedades deseadas y agregar un nuevo objeto con "idDispo" al resultado
-                const latitud = ultimoElemento.latitud !== undefined ? ultimoElemento.latitud : null;
-                const longitud = ultimoElemento.longitud !== undefined ? ultimoElemento.longitud : null;
-                resultado.push({ idDispo, latitud, longitud });
+              // Verificar si el objeto policia tiene la propiedad "ubicacion" y es un array
+              if (policia && policia.ubicacion && Array.isArray(policia.ubicacion)) {
+                  // Obtener el último elemento del array "ubicacion"
+                  const ubicacion = policia.ubicacion.length > 0 ? policia.ubicacion[policia.ubicacion.length - 1] : null;
+                  if (ubicacion && typeof ubicacion === 'object') {
+                    // Extraer las propiedades deseadas y agregar un nuevo objeto con "idDispo" al resultado
+                    const latitud = ubicacion.latitud !== undefined ? ubicacion.latitud : null;
+                    const longitud = ubicacion.longitud !== undefined ? ubicacion.longitud : null;
+              
+                    resultado.push({ idDispo, latitud, longitud });
+                }
               }
-
-            } else if (ubicaciones && typeof ubicaciones === 'object') {
-                const latitud = ubicaciones.latitud !== undefined ? ubicaciones.latitud : null;
-                const longitud = ubicaciones.longitud !== undefined ? ubicaciones.longitud : null;
-                  resultado.push({ idDispo, latitud, longitud });
-                  }            
-        }
-    }
-} else {
-    console.error('El objeto proporcionado no tiene la estructura esperada.');
-}
-console.log(resultado)
-return resultado;
+          }
+      }
+  } else {
+      console.error('El objeto proporcionado no tiene la estructura esperada.');
+  }
+  return resultado;
 }
 
 
