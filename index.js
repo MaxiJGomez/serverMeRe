@@ -1,6 +1,8 @@
 const http = require("http");
+const PORT = process.env.PORT || 5050
 
 const server = http.createServer();
+
 
 const io = require("socket.io")(server, {
   cors: { origin: "*" },
@@ -58,7 +60,6 @@ io.on("connection", (socket) => {
   };
   const agregarAlertas = (nombreAlerta) => {
     const existe = listaAlertas.some((el) => el.idUsu === nombreAlerta.idUsu); // ===>controla que el idSala del objeto nuevo no se repita en algún elemento del array listaAlertas
-
     if (!existe || !listaAlertas) {
       listaAlertas.push({
         idUsu: nombreAlerta.idUsu,
@@ -68,9 +69,7 @@ io.on("connection", (socket) => {
         latitud: nombreAlerta.latitudInicial,
         longitud: nombreAlerta.longitudInicial
       }); 
-
       const id = nombreAlerta.idUsu
-
       listaPolicias[id] = {codigoSala: nombreAlerta.codigoSala, policias: {}}
     }
   };
@@ -79,40 +78,32 @@ io.on("connection", (socket) => {
 const generarCodigoSala =() => {
   // Generar un número de 4 dígitos al azar
   const codigoSala = Math.floor(1000 + Math.random() * 9000).toString();
-
   return codigoSala;
 }
 
 const generarCodigoUnico=(array)=>{
   let nuevoCodigo;
   let existeCodigo = false
-
   do {
     // Generar un nuevo código de sala
     nuevoCodigo = generarCodigoSala();
-
     // Verificar si el nuevo código ya existe en el array
     existeCodigo = array.some(item => item.codigoSala === nuevoCodigo);
-
     // Repetir el proceso si el código ya existe
   } while (existeCodigo);
-
   return nuevoCodigo;
 }
 
 const obtenerUbiInicial =(codigoSala)=>{
   // Buscar el objeto con el código de sala dado
   const objetoEncontrado = listaAlertas.find(item => item.codigoSala === codigoSala);
-
-  // Devolver el idUsu si se encontró el objeto, o null si no se encontró
+  // Devolver el objeto completo con la ubicación inicial
   return objetoEncontrado;
 }
 
 const obtenerIdUsu =(codigoSala)=>{
-
  // Buscar el objeto con el código de sala dado
   const objetoEncontrado = listaAlertas.find(item => item.codigoSala === codigoSala);
-
  // Devolver el idUsu si se encontró el objeto, o null si no se encontró
   return objetoEncontrado.idUsu;
 }
@@ -120,14 +111,12 @@ const obtenerIdUsu =(codigoSala)=>{
 const ultimaUbiPolicia = (codigoSala)=>{
   let resultado = [];
   const objeto = listaPolicias[obtenerIdUsu(codigoSala)]
-
     // Verificar si el objeto tiene las propiedades esperadas
     if (objeto && objeto.policias) {
       // Iterar sobre las propiedades del objeto "policias"
       for (const idDispo in objeto.policias) {
           if (objeto.policias.hasOwnProperty(idDispo)) {
               const policia = objeto.policias[idDispo];
-
               // Verificar si el objeto policia tiene la propiedad "ubicacion" y es un array
               if (policia && policia.ubicacion && Array.isArray(policia.ubicacion)) {
                   // Obtener el último elemento del array "ubicacion"
@@ -136,7 +125,6 @@ const ultimaUbiPolicia = (codigoSala)=>{
                     // Extraer las propiedades deseadas y agregar un nuevo objeto con "idDispo" al resultado
                     const latitud = ubicacion.latitud !== undefined ? ubicacion.latitud : null;
                     const longitud = ubicacion.longitud !== undefined ? ubicacion.longitud : null;
-              
                     resultado.push({ idDispo, latitud, longitud });
                 }
               }
@@ -150,4 +138,4 @@ const ultimaUbiPolicia = (codigoSala)=>{
 
 
 
-server.listen(5050, () => console.log(server.address()));
+server.listen(PORT, () => console.log(server.address()));
