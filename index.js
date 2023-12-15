@@ -105,7 +105,7 @@ const obtenerIdUsu =(codigoSala)=>{
  // Buscar el objeto con el código de sala dado
   const objetoEncontrado = listaAlertas.find(item => item.codigoSala === codigoSala);
  // Devolver el idUsu si se encontró el objeto, o null si no se encontró
-  return objetoEncontrado.idUsu || null;
+  return objetoEncontrado.idUsu
 }
 
 const ultimaUbiPolicia = (codigoSala)=>{
