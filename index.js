@@ -25,7 +25,7 @@ io.on("connection", (socket) => {
       if (existeSala) {
         socket.join(data.codigoSala); // ===> Se une a sala de victima APP policia
         socket.join(`${data.codigoSala}policia`); // ===> Se une o crea sala paralela a una existente APP policia
-        data.tipoApp === "policia" ? listaPolicias[obtenerIdUsu(data.codigoSala)].policias[data.idDispo] = {ubicacion: []} : ()=>{}
+        data.tipoApp === "policia" ? listaPolicias[obtenerIdUsu(data.codigoSala).idUsu].policias[data.idDispo] = {ubicacion: []} : ()=>{}
         
         io.to(data.codigoSala).emit("ubicacionPrivada", obtenerUbiInicial(data.codigoSala))
       } else {
@@ -40,7 +40,7 @@ io.on("connection", (socket) => {
     if(data.tipoApp === "victima"){
       io.to(data.codigoSala).emit("ubicacionPrivada", data); // ===> envía los datos (lat, long, etc.) del usu a una sala de alerta
     }else if(data.tipoApp === "policia"){
-      listaPolicias[obtenerIdUsu(data.codigoSala)].policias[data.idDispo].ubicacion.push({latitud: data.latitud, longitud: data.longitud})
+      listaPolicias[obtenerIdUsu(data.codigoSala).idUsu].policias[data.idDispo].ubicacion.push({latitud: data.latitud, longitud: data.longitud})
       const ultimasUbis = ultimaUbiPolicia(data.codigoSala)
       io.to(`${data.codigoSala}policia`).emit("ubicacionPrivadaPolicias", ultimasUbis); // ===> envía los datos (lat, long, etc.) del policia a una sala de alerta
     }
@@ -105,7 +105,7 @@ const obtenerIdUsu =(codigoSala)=>{
  // Buscar el objeto con el código de sala dado
   const objetoEncontrado = listaAlertas.find(item => item.codigoSala === codigoSala);
  // Devolver el idUsu si se encontró el objeto, o null si no se encontró
-  return objetoEncontrado.idUsu || null;
+  return objetoEncontrado
 }
 
 const ultimaUbiPolicia = (codigoSala)=>{
