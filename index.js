@@ -1,7 +1,7 @@
-import { createServer } from "http";
+const http = require("http");
 const PORT = process.env.PORT || 10000
 
-const server = createServer();
+const server = http.createServer();
 
 
 const io = require("socket.io")(server, {
