@@ -53,10 +53,11 @@ io.on("connection", (socket) => {
   socket.on("eliminar_sala", (data) => {
     // ===> Filtrar el array para mantener solo las alertas que no tienen el idSala que deseas eliminar
     eliminarAlertas(data);
+    io.to(data).emit("finalizarAlerta", {msj:"Se ha dado de baja su alerta", accion: "baja"})
   });
 
   const eliminarAlertas = (codigoSala) => {
-    listarAlertas = listaAlertas.filter((alerta) => alerta.codigoSala !== codigoSala); // ===> Funcion para eliminar una Sala
+    listaAlertas = listaAlertas.filter((alerta) => alerta.codigoSala !== codigoSala); // ===> Funcion para eliminar una Sala
   };
   const agregarAlertas = (nombreAlerta) => {
     const existe = listaAlertas.some((el) => el.idUsu === nombreAlerta.idUsu); // ===>controla que el idSala del objeto nuevo no se repita en algún elemento del array listaAlertas
