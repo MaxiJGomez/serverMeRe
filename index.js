@@ -36,6 +36,12 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("existe_sala", (data, existeSala)=>{
+    const existeSala2 = listaAlertas.some((el) => el.codigoSala === data)
+    existeSala(existeSala2)
+  }
+  )
+
   socket.on("ubicacion_actual", (data) => {
     if(data.tipoApp === "victima"){
       io.to(data.codigoSala).emit("ubicacionPrivada", data); // ===> envía los datos (lat, long, etc.) del usu a una sala de alerta
