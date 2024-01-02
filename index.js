@@ -18,6 +18,7 @@ io.on("connection", (socket) => {
       socket.join(data.idUsu); // ===> Crea sala privada de la victima
       socket.join(codigoSala)
       agregarAlertas({...data, codigoSala}); // ===> Agrega las salas creadas a la listas de Salas
+      console.log(listaAlertas)
       io.to(data.idUsu).emit("codigoSala", codigoSala)
     } else {
       const existeSala = listaAlertas.some((el) => el.codigoSala === data.codigoSala); // ===> Comprueba que exista una sala ya creada

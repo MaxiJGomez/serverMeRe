@@ -2,4 +2,4 @@ services:
   - name: sever-mere-pjc
     env: node
     startCommand: npm start
-    httpPort: 5050
+    httpPort: 10000
