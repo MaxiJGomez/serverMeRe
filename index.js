@@ -28,6 +28,7 @@ io.on("connection", (socket) => {
         idUsuario = obtenerIdUsu(data.codigoSala)
         data.tipoApp === "policia" && idUsuario !== null  ? listaPolicias[idUsuario].policias[data.idDispo] = {ubicacionInicial: {latitud: data.latitud, longitud: data.longitud},ubicacionFinal: {latitud: data.latitud, longitud: data.longitud}} : ()=>{}
         io.to(data.codigoSala).emit("ubicacionPrivada", obtenerUbiInicial(data.codigoSala))
+        io.to(`${data.codigoSala}policia`).emit("ubicacionPrivadaPolicias", listaPolicias[obtenerIdUsu(data.codigoSala)].policias)
       } else {
         socket.join(data.idUsu); // ===> Al no coincidir con el código de la sala de la vícitima, crea una sala  nueva para emitir un mensaje de error y después eliminar la misma sala
         io.to(data.idUsu).emit("ubicacionPrivada", "Código inexistente"); // ===> envía mensaje de error
