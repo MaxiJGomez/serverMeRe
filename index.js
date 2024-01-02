@@ -48,7 +48,7 @@ io.on("connection", (socket) => {
     }else if(data.tipoApp === "policia"){
       idUsuario = obtenerIdUsu(data.codigoSala)
       idUsuario !== null ? listaPolicias[idUsuario].policias[data.idDispo].ubicacionFinal = {latitud: data.latitud, longitud: data.longitud} : console.log("error")
-      io.to(`${data.codigoSala}policia`).emit("ubicacionPrivadaPolicias", listaPolicias[obtenerIdUsu(data.codigoSala)].policias[data.idDispo].ubicacionFinal); // ===> envía los datos (lat, long, etc.) del policia a una sala de alerta
+      io.to(`${data.codigoSala}policia`).emit("ubicacionPrivadaPolicias", listaPolicias[obtenerIdUsu(data.codigoSala)]); // ===> envía los datos (lat, long, etc.) del policia a una sala de alerta
     }
   });
 
