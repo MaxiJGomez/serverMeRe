@@ -220,32 +220,69 @@ const obtenerIdUsu = (codigoSala) => {
   }
 };
 
-// const ultimaUbiPolicia = (codigoSala)=>{
-//   let resultado = [];
-//   const objeto = listaPolicias[obtenerIdUsu(codigoSala)]
-//     // Verificar si el objeto tiene las propiedades esperadas
-//     if (objeto && objeto.policias) {
-//       // Iterar sobre las propiedades del objeto "policias"
-//       for (const idDispo in objeto.policias) {
-//           if (objeto.policias.hasOwnProperty(idDispo)) {
-//               const policia = objeto.policias[idDispo];
-//               // Verificar si el objeto policia tiene la propiedad "ubicacion" y es un array
-//               if (policia && policia.ubicacion && Array.isArray(policia.ubicacion)) {
-//                   // Obtener el último elemento del array "ubicacion"
-//                   const ubicacion = policia.ubicacion.length > 0 ? policia.ubicacion[policia.ubicacion.length - 1] : null;
-//                   if (ubicacion && typeof ubicacion === 'object') {
-//                     // Extraer las propiedades deseadas y agregar un nuevo objeto con "idDispo" al resultado
-//                     const latitud = ubicacion.latitud !== undefined ? ubicacion.latitud : null;
-//                     const longitud = ubicacion.longitud !== undefined ? ubicacion.longitud : null;
-//                     resultado.push({ idDispo, latitud, longitud });
-//                 }
+
+// manejador strapi
+
+// const baseUrlStrapi = 'http://192.168.96.4:1337/api';
+
+// const fetchAbrirSala = async(data, codigoSala)=>{
+//         const historialUrlStrapi = `${baseUrlStrapi}/eventos`;
+
+//         const consulta = {
+//           method: 'POST',
+//           headers: {
+//             "Content-Type": "application/json"
+//           },
+//           body:JSON.stringify({
+//             data:{
+//               victima: data.idVictima,
+//               ubicacion: {"latitude": data.latitudInicial,
+//                               "longitude": data.longitudInicial},
+//               estado: true,
+//               urgente: true,
+//               multimediaTipo: "Alerta",
+//               textoPredStr: "Ha enviado una alerta",
+//               datosSocket:{"nombre": data.nombre, "apellido": data.apellido,"codigoSala": codigoSala
 //               }
-//           }
-//       }
-//   } else {
-//       console.error('El objeto proporcionado no tiene la estructura esperada.');
-//   }
-//   return resultado;
+//             }
+//           })
+//         };
+
+//         try {
+//              const resp = await fetch(historialUrlStrapi, consulta);
+//              const data = await resp.json();
+//              if (!resp.ok) throw new Error(`${resp.status}`);
+//         } catch (error) {
+//             console.log(error);
+//         }
+// }
+
+
+// const fetchCerrarSala = async(codigoSala)=>{
+//   const historialUrlStrapi = `${baseUrlStrapi}/eventos?filters[$and][datosSocket][codigoSala][$eq]=${codigoSala}&filters[estado][$eq]=true&filters[urgente][$eq]=true`;
+//   const dataSala = await fetch(historialUrlStrapi);
+//   const dataSalaJson = await dataSala.json()
+//    const bajaUrlStrapi = `${baseUrlStrapi}/eventos/${dataSalaJson.data[0].id}`;
+//    const consulta = {
+//      method: 'PUT',
+//      headers: {
+//        "Content-Type": "application/json"
+//      },
+//      body:JSON.stringify({
+//        data:{
+//          estado: false,
+//          urgente: false,
+//        }
+//      })
+//    };
+//    try {
+//         const resp = await fetch(bajaUrlStrapi, consulta);
+//         const data = await resp.json();
+//         if (!resp.ok) throw new Error(`${resp.status}`);
+//    } catch (error) {
+//        console.log("Este error es",error);
+//    }
+
 // }
 
 process.on("exit", guardarDatos);

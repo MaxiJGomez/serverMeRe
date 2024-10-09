@@ -30,3 +30,4 @@ export const guardarDatos = async (estado) => {
     console.error("Error al guardar datos:", error);
   }
 };
+
